@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личная веб-страница</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 1em;
+            text-align: center;
+            width: 100%;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1200px;
+            padding: 2em;
+        }
+        .main-content {
+            flex-grow: 1;
+            margin-right: 2em;
+        }
+        .option {
+            margin: 1em 0;
+        }
+        .option button {
+            display: block;
+            width: 100%;
+            margin: 0.5em 0;
+            padding: 0.5em 1em;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: left;
+        }
+        .option button:hover {
+            background-color: #45a049;
+        }
+        .option button.selected {
+            background-color: #2e7d32;
+        }
+        form {
+            margin-top: 1em;
+        }
+        form div {
+            margin-bottom: 1em;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5em;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 0.5em;
+            box-sizing: border-box;
+        }
+        .results-history {
+            flex-basis: 300px;
+            border-left: 1px solid #ddd;
+            padding-left: 1em;
+        }
+        .results-history h2 {
+            text-align: center;
+        }
+        .result-item {
+            margin-bottom: 1em;
+            padding: 0.5em;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Калькулятор характеристик модели Эрланга</h1>
+</header>
+
+<div class="container">
+    <div class="main-content">
+        <div class="option">
+            <button id="option1" class="selected" onclick="showForm(1)">Оценка характеристик по параметрам (Найти π, m)</button>
+            <button id="option2" onclick="showForm(2)">Оценка требуемого объема (Найти v, m)</button>
+            <button id="option3" onclick="showForm(3)">Оценка вспомогательных характеристик (Найти v, π)</button>
+            <button id="option4" onclick="showForm(4)">Оценка вспомогательных характеристик (Найти a, π)</button>
+            <button id="option5" onclick="showForm(5)">Оценка допустимого трафика (Найти a, m)</button>
+            <button id="option6" onclick="showForm(6)">Оценка вспомогательных характеристик (Найти a, v)</button>
+        </div>
+
+        <form id="dataForm" onsubmit="processForm(event)">
+            <div>
+                <label for="input1" id="label1">a</label>
+                <input type="text" id="input1" name="input1" required>
+            </div>
+            <div>
+                <label for="input2" id="label2">v</label>
+                <input type="text" id="input2" name="input2" required>
+            </div>
+            <button type="submit">Отправить</button>
+        </form>
+
+        <div id="results" class="results"></div>
+    </div>
+
+    <div class="results-history">
+        <h2>История результатов</h2>
+        <div id="history"></div>
+    </div>
+</div>
+
+<script>
+    function showForm(option) {
+        document.getElementById('dataForm').style.display = 'block';
+        document.getElementById('results').innerHTML = '';
+        window.selectedOption = option; // сохраняем выбранную опцию
+
+        // Удаляем класс 'selected' у всех кнопок
+        for (let i = 1; i <= 6; i++) {
+            document.getElementById('option' + i).classList.remove('selected');
+        }
+        // Добавляем класс 'selected' к выбранной кнопке
+        document.getElementById('option' + option).classList.add('selected');
+
+        // Изменяем метки полей ввода в зависимости от выбранной опции
+        let label1 = '';
+        let label2 = '';
+
+        switch(option) {
+            case 1:
+                label1 = 'a';
+                label2 = 'v';
+                break;
+            case 2:
+                label1 = 'a';
+                label2 = 'π';
+                break;
+            case 3:
+                label1 = 'a';
+                label2 = 'm';
+                break;
+            case 4:
+                label1 = 'v';
+                label2 = 'm';
+                break;
+            case 5:
+                label1 = 'v';
+                label2 = 'π';
+                break;
+            case 6:
+                label1 = 'π';
+                label2 = 'm';
+                break;
+        }
+
+        document.getElementById('label1').textContent = label1;
+        document.getElementById('label2').textContent = label2;
+    }
+
+function processForm(event) {
+    event.preventDefault();
+    const input1 = parseFloat(document.getElementById('input1').value);
+    const input2 = parseFloat(document.getElementById('input2').value);
+    const resultsDiv = document.getElementById('results');
+    const historyDiv = document.getElementById('history');
+    let optionText = '';
+    let result1 = 0;
+    let result2 = 0;
+    let var1 = '';
+    let var2 = '';
+
+    switch(window.selectedOption) {
+        case 1:
+            optionText = 'Оценка характеристик по параметрам (Найти π, m)';
+            var1 = 'π';
+            var2 = 'm';
+            result1 = getPiWithAV(input1, input2);  // pi
+            result2 = getMWithAPi(input1, result1);  // m
+            break;
+        case 2:
+            optionText = 'Оценка требуемого объема (Найти v, m)';
+            var1 = 'v';
+            var2 = 'm';
+            result1 = getVWithAPi(input1, input2);  // v
+            result2 = getMWithAPi(input1, input2);  // m
+            break;
+        case 3:
+            optionText = 'Оценка вспомогательных характеристик (Найти v, π)';
+            var1 = 'π';
+            var2 = 'v';
+            result1 = getPiWithAM(input1, input2);  // pi
+            result2 = getVWithAPi(input1, result1);  // v
+            break;
+        case 4:
+            optionText = 'Оценка вспомогательных характеристик (Найти a, π)';
+            var1 = 'a';
+            var2 = 'π';
+            const results = getAPi(input1, input2);  // {a, pi}
+            result1 = results.a;
+            result2 = results.pi;
+            break;
+        case 5:
+            optionText = 'Оценка допустимого трафика (Найти a, m)';
+            var1 = 'a';
+            var2 = 'm';
+            result1 = getAWithVPi(input1, input2);  // a
+            result2 = getMWithAPi(result1, input2);  // m
+            break;
+        case 6:
+            optionText = 'Оценка вспомогательных характеристик (Найти a, v)';
+            var1 = 'a';
+            var2 = 'v';
+            result1 = getAWithMPi(input1, input2);  // a
+            result2 = getVWithAPi(result1, input2);  // v
+            break;
+        default:
+            optionText = 'Неизвестная опция';
+    }
+
+    const resultItem = document.createElement('div');
+    resultItem.className = 'result-item';
+    resultItem.innerHTML = `<p>Результаты для: ${optionText}</p>
+                            <p>${document.getElementById('label1').textContent}: ${input1}</p>
+                            <p>${document.getElementById('label2').textContent}: ${input2}</p>
+                            <p>${var1}: ${result1}</p>
+                            <p>${var2}: ${result2}</p>`;
+    historyDiv.prepend(resultItem);
+
+    resultsDiv.innerHTML = `<p>Результаты для: ${optionText}</p>
+                            <p>${document.getElementById('label1').textContent}: ${input1}</p>
+                            <p>${document.getElementById('label2').textContent}: ${input2}</p>
+                            <p>${var1}: ${result1}</p>
+                            <p>${var2}: ${result2}</p>`;
+}
+
+
+    function validateInput(prompt) {
+        return parseFloat(prompt(prompt));
+    }
+
+    function getPi(v, a) {
+        if (v === 0) {
+            return 1;
+        }
+        const prev = getPi(v - 1, a);
+        return a * prev / (v + a * prev);
+    }
+
+        function getPiWithAV(a, v) {
+        return getPi(v, a);
+    }
+
+    function getPiWithAM(a, m) {
+        return 1 - m / a;
+    }
+
+    function getVWithAPi(a, pi) {
+        let v = 0;
+        const epsilon = 0.001;
+        while (true) {
+            const currentPi = getPi(v, a);
+            if (Math.abs(currentPi - pi) < epsilon) {
+                break;
+            }
+            v += 1.0;
+        }
+        return v;
+    }
+
+    function getMWithAPi(a, pi) {
+        return a * (1 - pi);
+    }
+
+    function getAPi(v, m) {
+        let a = 0.0;
+        const epsilon = 0.001;
+        let pi;
+        while (true) {
+            pi = getPi(v, a);
+            const currentM = getMWithAPi(a, pi);
+            if (Math.abs(currentM - m) < epsilon) {
+                break;
+            }
+            a += 0.001;
+        }
+        return { a: Math.ceil(a), pi };
+    }
+
+    function getAWithVPi(v, pi) {
+        let a = 0.0;
+        const epsilon = 0.01;
+        while (true) {
+            const currentPi = getPi(v, a);
+            if (Math.abs(currentPi - pi) < epsilon) {
+                break;
+            }
+            a += 1;
+        }
+        return a;
+    }
+
+    function getAWithMPi(m, pi) {
+        return Math.ceil(m / (1 - pi));
+    }
+
+    // Вызываем showForm(1) при загрузке страницы
+    document.addEventListener("DOMContentLoaded", function() {
+        showForm(1);
+    });
+</script>
+
+</body>
+</html>
