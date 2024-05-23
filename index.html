@@ -161,8 +161,8 @@
                 label2 = 'π';
                 break;
             case 6:
-                label1 = 'π';
-                label2 = 'm';
+                label1 = 'm';
+                label2 = 'π';
                 break;
         }
 
@@ -269,7 +269,7 @@ function processForm(event) {
 
     function getVWithAPi(a, pi) {
         let v = 0;
-        const epsilon = 0.001;
+        const epsilon = 0.01;
         while (true) {
             const currentPi = getPi(v, a);
             if (Math.abs(currentPi - pi) < epsilon) {
