@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Личная веб-страница</title>
+    <title>Калькулятор Эрланга</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -269,7 +269,7 @@ function processForm(event) {
 
     function getVWithAPi(a, pi) {
         let v = 0;
-        const epsilon = 0.01;
+        const epsilon = 0.001;
         while (true) {
             const currentPi = getPi(v, a);
             if (Math.abs(currentPi - pi) < epsilon) {
@@ -301,7 +301,7 @@ function processForm(event) {
 
     function getAWithVPi(v, pi) {
         let a = 0.0;
-        const epsilon = 0.01;
+        const epsilon = 0.001;
         while (true) {
             const currentPi = getPi(v, a);
             if (Math.abs(currentPi - pi) < epsilon) {
